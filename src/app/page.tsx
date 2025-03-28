@@ -1,12 +1,16 @@
 "use client"
+
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import Link from "next/link"
+import { useState } from "react"
 
 export default function Home() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme, theme } = useTheme();
+  const [message, setMessage] = useState<string>("");
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center space-y-4">
       <Button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} variant="outline" size="icon">
@@ -19,10 +23,12 @@ export default function Home() {
         <h1 className="text-center text-3xl">What do you want to Build ?</h1>
         <p>Prompt, run, edit, Web Application</p>
       </div>
-      <div className="grid w-full gap-2 max-w-3xl bg-transparent">
-        <Textarea placeholder="Type your message here." className="min-h-[120px] border-2 max-h-[200px]" />
-        <Button>Send message</Button>
-      </div>
+      <form className="grid w-full gap-2 max-w-3xl bg-transparent">
+        <Textarea onChange={(e) => setMessage(e.target.value)} value={message} placeholder="Type your message here." className="min-h-[120px] border-2 max-h-[200px]" />
+        <Link href={`/chat?prompt=${message}`} className="w-full">
+          <Button className="w-full">Send message</Button>
+        </Link>
+      </form>
     </main>
   );
 }
