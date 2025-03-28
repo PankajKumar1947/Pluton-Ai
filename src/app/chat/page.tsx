@@ -1,3 +1,7 @@
+import ChatBox from "@/components/features/chat/chat-box"
+import CodeEditor from "@/components/features/editor/code-editor"
+import Terminal from "@/components/features/terminal/terminal"
+
 import {
     ResizableHandle,
     ResizablePanel,
@@ -12,9 +16,7 @@ export default function Chat() {
         >
             {/* Chat Box */}
             <ResizablePanel defaultSize={30}>
-                <div className="flex h-[200px] items-center justify-center p-6">
-                    <span className="font-semibold">Chat Box</span>
-                </div>
+                <ChatBox />
             </ResizablePanel>
             <ResizableHandle />
 
@@ -26,17 +28,13 @@ export default function Chat() {
                 <ResizablePanelGroup direction="vertical">
                     {/* Code Editor */}
                     <ResizablePanel defaultSize={80} className="border">
-                        <div className="flex h-full items-center justify-center p-6">
-                            <span className="font-semibold">Code Editor</span>
-                        </div>
+                        <CodeEditor />
                     </ResizablePanel>
                     <ResizableHandle />
 
                     {/* Terminal */}
                     <ResizablePanel defaultSize={20} className="rounded-t-2xl border">
-                        <div className="flex h-full items-center justify-center p-6">
-                            <span className="font-semibold">Terminal</span>
-                        </div>
+                        <Terminal />
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </ResizablePanel>
