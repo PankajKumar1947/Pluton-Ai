@@ -1,3 +1,7 @@
+"use client"
+import axios from 'axios'
+import { useSearchParams } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 import ChatBox from "@/components/features/chat/chat-box"
 import CodeEditor from "@/components/features/editor/code-editor"
 import Terminal from "@/components/features/terminal/terminal"
@@ -9,6 +13,25 @@ import {
 } from "@/components/ui/resizable"
 
 export default function Chat() {
+    const searchParams = useSearchParams();
+    const prompt = searchParams.get("prompt");
+    const [files , setFiles] = useState({});
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.post('/api/template', {
+                    prompt: prompt,
+                });
+                console.log("response",response);
+                setFiles(response.data?.uiPrompts);
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        fetchData();
+    },[])
     return (
         <ResizablePanelGroup
             direction="horizontal"
@@ -28,7 +51,7 @@ export default function Chat() {
                 <ResizablePanelGroup direction="vertical">
                     {/* Code Editor */}
                     <ResizablePanel defaultSize={80} className="border">
-                        <CodeEditor />
+                        <CodeEditor files={files} />
                     </ResizablePanel>
                     <ResizableHandle />
 

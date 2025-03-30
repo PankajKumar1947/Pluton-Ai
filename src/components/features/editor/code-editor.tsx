@@ -1,16 +1,18 @@
 "use client"
 
+import { useState } from "react";
 import FileStructure from "./files-structure";
 import MonacoEditor from "./monaco-editor";
 
-export default function CodeEditor() {
+export default function CodeEditor({files}:any) {
+    const [activeFile, setActiveFile] = useState<any>({});
     return (
         <div className="h-full flex w-full">
             <div className="w-1/5 border">
-                <FileStructure />
+                <FileStructure files={files?.boltArtifact?.boltAction} setActiveFile={setActiveFile}/>
             </div>
             <div className="w-4/5">
-                <MonacoEditor />
+                <MonacoEditor value={activeFile?.content}/>
             </div>
         </div>
     )
