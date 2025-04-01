@@ -11,16 +11,18 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import Preview from "@/components/features/preview/preview";
+import { WebContainer } from "@webcontainer/api";
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
     const tree = [...initialFiles]; // Create a shallow copy to avoid direct mutation
 
-    files.forEach(({ filePath, code }:any) => {
+    files.forEach(({ filePath, code }: any) => {
         const parts = filePath.split('/');
         let currentLevel = tree;
 
-        parts.forEach((part:any, index:number) => {
+        parts.forEach((part: any, index: number) => {
             const isFile = index === parts.length - 1;
 
             let existingItem = currentLevel.find(item =>
@@ -55,6 +57,9 @@ export default function Chat() {
     const [files, setFiles] = useState([]);
     const [codeResponse, setCodeResponse] = useState("");
     const [artifact, setArtifact] = useState({ id: "", title: "", actions: [] });
+    const [preview, setPreview] = useState(false);
+    const [disablePreview, setDisablePreview] = useState(false);
+    const [webcontainer, setWebcontainer] = useState<WebContainer>();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -75,6 +80,9 @@ export default function Chat() {
                         })),
                     }),
                 });
+                if(res.status !== 200) {
+                    return
+                }
 
                 if (!res.body) return;
 
@@ -89,7 +97,7 @@ export default function Chat() {
                     const chunk = decoder.decode(value, { stream: true });
                     buffer += chunk; // Accumulate stream
 
-                    console.log("chunk", chunk);
+                    // console.log("chunk", chunk);
 
                     // **Extract `<boltArtifact>` Data**
                     const artifactMatch = buffer.match(
@@ -106,6 +114,7 @@ export default function Chat() {
                     // **Extract `<boltAction>` Code Blocks**
                     const actionMatches = [
                         ...buffer.matchAll(
+                            //@ts-ignore
                             /<boltAction type="file" filePath="(.+?)">(.*?)<\/boltAction>/gs
                         ),
                     ];
@@ -117,24 +126,21 @@ export default function Chat() {
                                 code,
                             })),
                         }));
-                        
 
                         // files by files complete code snippet
                         actionMatches.forEach(([_, filePath, code]) => {
                             setCodeResponse(code)
                         });
-
-                        
-
-                        
                     }
-
                     // **Update Code Response Live**
                     setCodeResponse((prevResponse) => prevResponse + chunk);
-
-
-
                 }
+
+                const webcontainerInstance = await WebContainer.boot();
+                setWebcontainer(webcontainerInstance)
+
+                setDisablePreview(true);
+                setPreview(true);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -145,13 +151,13 @@ export default function Chat() {
 
     useEffect(() => {
         //@ts-ignore
-        setFiles(buildFileTree(files,artifact.actions));
+        setFiles(buildFileTree(files, artifact.actions));
     }, [artifact.actions]);
-    
+
 
 
     console.log("artifact", artifact);
-    console.log("codeResponse", codeResponse);
+    // console.log("codeResponse", codeResponse);
     console.log("files", files);
     return (
         <ResizablePanelGroup
@@ -165,26 +171,31 @@ export default function Chat() {
             <ResizableHandle />
 
             <ResizablePanel defaultSize={70} className="h-screen space-y-1">
-                <div className="bg-white max-w-56 rounded-2xl outline-0">
-                    <button className="bg-blue-700 px-8 py-1 rounded-2xl cursor-pointer">
+                <div className="bg-white max-w-56 flex justify-between rounded-2xl outline-0">
+                    <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"} px-8 py-1 rounded-2xl cursor-pointer`}>
                         Code
                     </button>
-                    <button className="text-black px-8 py-1 rounded-2xl cursor-pointer">
+                    <button onClick={() => setPreview(true)} disabled={!disablePreview} className={`px-8 py-1 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
                         Preview
                     </button>
                 </div>
-                <ResizablePanelGroup direction="vertical">
-                    {/* Code Editor */}
-                    <ResizablePanel defaultSize={100} className="border">
-                        <CodeEditor files={files} code={codeResponse} />
-                    </ResizablePanel>
-                    <ResizableHandle />
 
-                    {/* Terminal */}
-                    {/* <ResizablePanel defaultSize={20} className="rounded-t-2xl border">
-                        <Terminal />
-                    </ResizablePanel> */}
-                </ResizablePanelGroup>
+                {
+                    preview ? (
+                        <Preview files={files} webContainerInstance={webcontainer}/>
+                    ) : <ResizablePanelGroup direction="vertical" className="h-full">
+                        {/* Code Editor */}
+                        <ResizablePanel defaultSize={100} className="border">
+                            <CodeEditor files={files} code={codeResponse} />
+                        </ResizablePanel>
+                        <ResizableHandle />
+
+                        {/* Terminal */}
+                        <ResizablePanel defaultSize={20} className="rounded-t-2xl border">
+                            <Terminal />
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                }
             </ResizablePanel>
         </ResizablePanelGroup>
     );
