@@ -54,33 +54,38 @@ const buildFileTree = (initialFiles: any, files: any) => {
 export default function Chat() {
     const searchParams = useSearchParams();
     const prompt = searchParams.get("prompt");
-    const [files, setFiles] = useState([]);
+    const [files, setFiles] = useState(JSON.parse(sessionStorage.getItem('files') || '[]'));
     const [codeResponse, setCodeResponse] = useState("");
     const [artifact, setArtifact] = useState({ id: "", title: "", actions: [] });
     const [preview, setPreview] = useState(false);
     const [disablePreview, setDisablePreview] = useState(false);
     const [webcontainer, setWebcontainer] = useState<WebContainer>();
+    const [url, setUrl] = useState('');
+
+    const storedPrompts = sessionStorage.getItem('prompts');
+    const prompts: string[] = storedPrompts ? JSON.parse(storedPrompts) : []; 
+    const [llmMessage, setLlmMessage] = useState<{ role: string; content: string }[]>(
+        prompts.map((content) => ({
+            role: "user",
+            content: content,
+        }))
+    );
+    const [followUpPromptStatus, setFollowUpPromptStatus] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch UI Templates
-                const response = await axios.post("/api/template", { prompt });
-                setFiles(response.data?.uiPrompts?.boltArtifact?.boltAction);
-                const prompts = response.data?.prompts;
-
+                setDisablePreview(true);
+                setPreview(true);
                 // Send the request to the /api/chats endpoint
                 const res = await fetch("/api/chats", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        prompts: [...prompts, prompt].map((content) => ({
-                            role: "user",
-                            content,
-                        })),
+                        prompts: llmMessage,
                     }),
                 });
-                if(res.status !== 200) {
+                if (res.status !== 200) {
                     return
                 }
 
@@ -136,6 +141,18 @@ export default function Chat() {
                     setCodeResponse((prevResponse) => prevResponse + chunk);
                 }
 
+
+                //@ts-ignore
+                setLlmMessage([...prompts, prompt].map(content => ({
+                    role: "user",
+                    content
+                })));
+
+                setLlmMessage((prev) => [
+                    ...prev,
+                    { role: "assistant", content: buffer }
+                ])
+
                 const webcontainerInstance = await WebContainer.boot();
                 setWebcontainer(webcontainerInstance)
 
@@ -147,7 +164,7 @@ export default function Chat() {
         };
 
         fetchData();
-    }, []);
+    }, [followUpPromptStatus]);
 
     useEffect(() => {
         //@ts-ignore
@@ -156,9 +173,9 @@ export default function Chat() {
 
 
 
-    console.log("artifact", artifact);
+    // console.log("artifact", artifact);
     // console.log("codeResponse", codeResponse);
-    console.log("files", files);
+    // console.log("files", files);
     return (
         <ResizablePanelGroup
             direction="horizontal"
@@ -166,7 +183,7 @@ export default function Chat() {
         >
             {/* Chat Box */}
             <ResizablePanel defaultSize={30}>
-                <ChatBox />
+                <ChatBox llmMessage={llmMessage} setLlmMessage={setLlmMessage} setFollowUpPromptStatus={setFollowUpPromptStatus}/>
             </ResizablePanel>
             <ResizableHandle />
 
@@ -182,7 +199,7 @@ export default function Chat() {
 
                 {
                     preview ? (
-                        <Preview files={files} webContainerInstance={webcontainer}/>
+                        <Preview files={files} webContainerInstance={webcontainer} url={url} setUrl={setUrl} />
                     ) : <ResizablePanelGroup direction="vertical" className="h-full">
                         {/* Code Editor */}
                         <ResizablePanel defaultSize={100} className="border">

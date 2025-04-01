@@ -2,20 +2,32 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import axios from "axios";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation"; // ✅ Import useRouter
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Home() {
   const { setTheme, theme } = useTheme();
-  const [message, setMessage] = useState<string>("");
-  const router = useRouter(); // ✅ Initialize router
+  const [prompt, setPrompt] = useState<string>("");
+  const router = useRouter();
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      router.push(`/chat?prompt=${encodeURIComponent(message)}`); // ✅ Navigate dynamically
+  const sendPrompt = async () => {
+    try {
+      const response = await axios.post("/api/template", { prompt });
+
+      if (response.status === 200) {
+        const prompts = response.data?.prompts;
+        prompts.push(prompt);
+        sessionStorage.setItem('prompts', JSON.stringify(prompts));
+        sessionStorage.setItem('files', JSON.stringify(response.data?.uiPrompts?.boltArtifact?.boltAction));
+        router.push(`/chat?prompt=${prompt}`);
+      }
+    } catch (error) {
+      console.error("Error sending Prompt:", error);
     }
+
   };
 
   return (
@@ -33,12 +45,12 @@ export default function Home() {
 
       <form className="grid w-full gap-2 max-w-3xl bg-transparent" onSubmit={(e) => e.preventDefault()}>
         <Textarea
-          onChange={(e) => setMessage(e.target.value)}
-          value={message}
+          onChange={(e) => setPrompt(e.target.value)}
+          value={prompt}
           placeholder="Type your message here."
           className="min-h-[120px] border-2 max-h-[200px]"
         />
-        <Button className="w-full" onClick={handleSendMessage}>
+        <Button className="w-full" onClick={sendPrompt}>
           Send message
         </Button>
       </form>

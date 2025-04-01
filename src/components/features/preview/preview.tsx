@@ -21,14 +21,15 @@ function convertToWebContainersFormat(items: any[]): any {
 }
 
 
-export default function Preview({ files, webContainerInstance }: any) {
-    const [url, setUrl] = useState('');
+export default function Preview({ files, webContainerInstance, url, setUrl }: any) {
     const [status, setStatus] = useState('Setting up WebContainer...');
     const [error, setError] = useState('');
 
     useEffect(() => {
         const init = async () => {
             try {
+                // if(url)
+                //     return ;
                 setStatus('Formatting files...');
                 const formattedFiles = convertToWebContainersFormat(files);
                 console.log('Formatted files:', formattedFiles);
