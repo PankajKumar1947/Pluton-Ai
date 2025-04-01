@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function ChatBox({llmMessage, setLlmMessage, setFollowUpPromptStatus}:any) {
+export default function ChatBox({ llmMessage, setLlmMessage, setFollowUpPromptStatus }: any) {
     const [message, setMessage] = useState<string>("");
 
     const handleSendMessage = () => {
-        setLlmMessage([...llmMessage, 
-            { role: "user", content: message }
+        setLlmMessage([...llmMessage,
+        { role: "user", content: message }
         ]);
         setFollowUpPromptStatus((prev: boolean) => !prev);
         setMessage('');
@@ -16,6 +16,20 @@ export default function ChatBox({llmMessage, setLlmMessage, setFollowUpPromptSta
         <div className="border h-full relative">
             <div className="p-4">
                 <h1 className="font-semibold text-center">Chat Messages</h1>
+                <div className="mt-4 h-[400px] overflow-y-scroll">
+                    {
+                        llmMessage
+                            .filter((message: any) => message.role.trim() === "user") // Ensure no extra spaces
+                            .slice(2)
+                            .map((message: any, index: number) => (
+                                <div key={index} className="flex justify-end mb-2">
+                                    <div className="bg-blue-600 rounded-lg p-2 max-w-3xl">
+                                        {message.content}
+                                    </div>
+                                </div>
+                            ))
+                    }
+                </div>
             </div>
 
 

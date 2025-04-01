@@ -1,5 +1,5 @@
 "use client";
-import axios from "axios";
+
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import ChatBox from "@/components/features/chat/chat-box";
@@ -16,7 +16,7 @@ import { WebContainer } from "@webcontainer/api";
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
-    const tree = [...initialFiles]; // Create a shallow copy to avoid direct mutation
+    const tree = [...initialFiles];
 
     files.forEach(({ filePath, code }: any) => {
         const parts = filePath.split('/');
@@ -38,7 +38,7 @@ const buildFileTree = (initialFiles: any, files: any) => {
                 currentLevel.push(existingItem);
             } else {
                 if (isFile) {
-                    existingItem.content = code; // Update file content
+                    existingItem.content = code; // Updating file content
                 }
             }
 
@@ -75,8 +75,7 @@ export default function Chat() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setDisablePreview(true);
-                setPreview(true);
+                setPreview(false);
                 // Send the request to the /api/chats endpoint
                 const res = await fetch("/api/chats", {
                     method: "POST",
@@ -104,7 +103,7 @@ export default function Chat() {
 
                     // console.log("chunk", chunk);
 
-                    // **Extract `<boltArtifact>` Data**
+                    // Extract `<boltArtifact>` Data
                     const artifactMatch = buffer.match(
                         /<boltArtifact id="(.+?)" title="(.+?)">/
                     );
@@ -116,7 +115,7 @@ export default function Chat() {
                         }));
                     }
 
-                    // **Extract `<boltAction>` Code Blocks**
+                    // Extract `<boltAction>` Code Blocks*
                     const actionMatches = [
                         ...buffer.matchAll(
                             //@ts-ignore
@@ -137,7 +136,7 @@ export default function Chat() {
                             setCodeResponse(code)
                         });
                     }
-                    // **Update Code Response Live**
+                    // Update Code Response Live
                     setCodeResponse((prevResponse) => prevResponse + chunk);
                 }
 
@@ -152,12 +151,15 @@ export default function Chat() {
                     ...prev,
                     { role: "assistant", content: buffer }
                 ])
-
-                const webcontainerInstance = await WebContainer.boot();
-                setWebcontainer(webcontainerInstance)
+                
+                if(!webcontainer){
+                    const webcontainerInstance = await WebContainer.boot();
+                    setWebcontainer(webcontainerInstance)
+                }
 
                 setDisablePreview(true);
                 setPreview(true);
+                setUrl("");
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -192,7 +194,7 @@ export default function Chat() {
                     <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"} px-8 py-1 rounded-2xl cursor-pointer`}>
                         Code
                     </button>
-                    <button onClick={() => setPreview(true)} disabled={!disablePreview} className={`px-8 py-1 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
+                    <button onClick={() => setPreview(true)} className={`px-8 py-1 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
                         Preview
                     </button>
                 </div>

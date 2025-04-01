@@ -28,12 +28,12 @@ export default function Preview({ files, webContainerInstance, url, setUrl }: an
     useEffect(() => {
         const init = async () => {
             try {
-                // if(url)
-                //     return ;
                 setStatus('Formatting files...');
                 const formattedFiles = convertToWebContainersFormat(files);
                 console.log('Formatted files:', formattedFiles);
 
+                if(url)
+                    return ;
 
                 setStatus('Mounting files...');
                 await webContainerInstance.mount(formattedFiles);
@@ -75,7 +75,7 @@ export default function Preview({ files, webContainerInstance, url, setUrl }: an
                 );
 
                 // Wait for server-ready event
-                webContainerInstance.on('server-ready', (port, serverUrl) => {
+                webContainerInstance.on('server-ready', (port: number, serverUrl: string) => {
                     console.log(`Server ready on port ${port} at ${serverUrl}`);
                     setStatus(`Server ready at ${serverUrl}`);
                     setUrl(serverUrl);
