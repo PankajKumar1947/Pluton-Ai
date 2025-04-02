@@ -28,5 +28,5 @@ model Project {
   name      String
   owner     User      @relation(fields: [ownerId], references: [id])
   ownerId   String
-  code      Json
+  files      Json[]
 }

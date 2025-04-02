@@ -172,11 +172,11 @@ Here are some examples of correct usage of artifacts:
 
       <boltArtifact id="factorial-function" title="JavaScript Factorial Function">
         <boltAction type="file" filePath="index.js">
-          function factorial(n) {
-           ...
-          }
-
+        function factorial(n) {
           ...
+        }
+
+        ...
         </boltAction>
 
         <boltAction type="shell">
@@ -194,13 +194,13 @@ Here are some examples of correct usage of artifacts:
 
       <boltArtifact id="snake-game" title="Snake Game in HTML and JavaScript">
         <boltAction type="file" filePath="package.json">
-          {
-            "name": "snake",
-            "scripts": {
-              "dev": "vite"
-            }
-            ...
+        {
+          "name": "snake",
+          "scripts": {
+            "dev": "vite"
           }
+          ...
+        }
         </boltAction>
 
         <boltAction type="shell">
@@ -228,28 +228,28 @@ Here are some examples of correct usage of artifacts:
 
       <boltArtifact id="bouncing-ball-react" title="Bouncing Ball with Gravity in React">
         <boltAction type="file" filePath="package.json">
-          {
-            "name": "bouncing-ball",
-            "private": true,
-            "version": "0.0.0",
-            "type": "module",
-            "scripts": {
-              "dev": "vite",
-              "build": "vite build",
-              "preview": "vite preview"
-            },
-            "dependencies": {
-              "react": "^18.2.0",
-              "react-dom": "^18.2.0",
-              "react-spring": "^9.7.1"
-            },
-            "devDependencies": {
-              "@types/react": "^18.0.28",
-              "@types/react-dom": "^18.0.11",
-              "@vitejs/plugin-react": "^3.1.0",
-              "vite": "^4.2.0"
-            }
+        {
+          "name": "bouncing-ball",
+          "private": true,
+          "version": "0.0.0",
+          "type": "module",
+          "scripts": {
+            "dev": "vite",
+            "build": "vite build",
+            "preview": "vite preview"
+          },
+          "dependencies": {
+            "react": "^18.2.0",
+            "react-dom": "^18.2.0",
+            "react-spring": "^9.7.1"
+          },
+          "devDependencies": {
+            "@types/react": "^18.0.28",
+            "@types/react-dom": "^18.0.11",
+            "@vitejs/plugin-react": "^3.1.0",
+            "vite": "^4.2.0"
           }
+        }
         </boltAction>
 
         <boltAction type="file" filePath="index.html">

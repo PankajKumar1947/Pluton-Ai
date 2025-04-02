@@ -6,7 +6,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     try {
         const { userId, files, projectId, projectName } = data;
 
-        if (!userId || !files) {
+        if (!userId || !files.length) {
             return NextResponse.json(
                 { message: "Missing required fields" },
                 { status: 400 }
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
             );
         }
 
-        const projectExist = prisma.project.findUnique({
+        const projectExist = await prisma.project.findUnique({
             where: {
                 id: projectId
             }
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 data: {
                     ownerId: userId,
                     name: projectName,
-                    code: JSON.stringify(files)
+                    files: files
                 }
             })
 
@@ -48,17 +48,18 @@ export async function POST(req: NextRequest, res: NextResponse) {
             );
         } else {
             //update the project
-            const project = await prisma.project.update({
+            await prisma.project.update({
                 where: {
                     id: projectId,
                 },
                 data: {
-                    code: JSON.stringify(files)
+                    files: files,
+                    name: projectName,
                 }
             })
 
             return NextResponse.json(
-                { message: "Project updated successfully", project },
+                { message: "Project updated successfully" },
                 { status: 200 }
             );
         }

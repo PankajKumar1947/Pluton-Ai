@@ -14,6 +14,7 @@ import {
 import Preview from "@/components/features/preview/preview";
 import { WebContainer } from "@webcontainer/api";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
@@ -72,6 +73,7 @@ export default function Chat() {
         }))
     );
     const [followUpPromptStatus, setFollowUpPromptStatus] = useState(false);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -169,11 +171,31 @@ export default function Chat() {
         fetchData();
     }, [followUpPromptStatus]);
 
+    const saveFilesToDB = async () => {
+        try {
+            setSaving(true);
+            const response = await axios.post("/api/projects", {
+                userId: "cm8zhuaew0000356phofi235d",
+                files: files,
+                projectId: "cm8zntmmv0001n6z8sqfqgydo",
+                projectName: prompt
+            });
+
+            if (response.status === 200) {
+                console.log("response", response);
+                setSaving(false);
+            }
+        } catch (error) {
+            console.error("Saving Code:", error);
+            setSaving(false);
+        }
+
+    }
+
     useEffect(() => {
         //@ts-ignore
         setFiles(buildFileTree(files, artifact.actions));
     }, [artifact.actions]);
-
 
 
     // console.log("artifact", artifact);
@@ -185,7 +207,7 @@ export default function Chat() {
                 <h1 className="text-2xl font-bold text-indigo-600">Pluton Ai</h1>
                 <h1 className="text-center">{artifact?.title || "Pluton AI"}</h1>
                 <div className="space-x-2 text-sm">
-                    <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Save</button>
+                    <button onClick={saveFilesToDB} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Save</button>
                     <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
                 </div>
             </div>
