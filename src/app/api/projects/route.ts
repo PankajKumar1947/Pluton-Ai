@@ -1,7 +1,7 @@
 import prisma from "@/utils/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
     const data = await req.json();
     try {
         const { userId, files, projectId, projectName } = data;
@@ -63,6 +63,31 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 { status: 200 }
             );
         }
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json(
+            { message: "Something went wrong" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function GET(req: NextRequest) {
+    const userId = req.nextUrl.searchParams.get("userId") as string;
+    try {
+        const projects = await prisma.project.findMany({
+            where: {
+                ownerId: userId
+            },
+            select:  {
+                id: true,
+                name: true
+            }
+        })
+        return NextResponse.json(
+            { message: "Projects fetched successfully", data: projects },
+            { status: 200 },
+        );
     } catch (error) {
         console.log(error);
         return NextResponse.json(

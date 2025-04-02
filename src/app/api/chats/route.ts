@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
                 { role: "system", content: getSystemPrompt() },
                 ...prompts,
             ],
-            maxTokens: 8000,
+            maxTokens: 800,
         });
 
         const stream = new ReadableStream({

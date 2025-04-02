@@ -207,7 +207,7 @@ export default function Chat() {
                 <h1 className="text-2xl font-bold text-indigo-600">Pluton Ai</h1>
                 <h1 className="text-center">{artifact?.title || "Pluton AI"}</h1>
                 <div className="space-x-2 text-sm">
-                    <button onClick={saveFilesToDB} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Save</button>
+                    <button disabled={saving} onClick={saveFilesToDB} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">{saving ? "Saving..." : "Save"} </button>
                     <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
                 </div>
             </div>
@@ -222,11 +222,11 @@ export default function Chat() {
                 <ResizableHandle />
 
                 <ResizablePanel defaultSize={70} className="space-y-1 h-screen mt-2 px-2">
-                    <div className="bg-white max-w-56 flex justify-between rounded-2xl outline-0">
-                        <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"} px-8 py-1 rounded-2xl cursor-pointer`}>
+                    <div className="bg-white max-w-36 flex justify-between rounded-2xl outline-0 text-sm">
+                        <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"}  py-1 px-4 rounded-2xl cursor-pointer`}>
                             Code
                         </button>
-                        <button onClick={() => setPreview(true)} className={`px-8 py-1 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
+                        <button onClick={() => setPreview(true)} className={` py-1 px-4 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
                             Preview
                         </button>
                     </div>
