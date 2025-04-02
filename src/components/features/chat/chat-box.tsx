@@ -22,8 +22,8 @@ export default function ChatBox({ llmMessage, setLlmMessage, setFollowUpPromptSt
                             .filter((message: any) => message.role.trim() === "user") // Ensure no extra spaces
                             .slice(2)
                             .map((message: any, index: number) => (
-                                <div key={index} className="flex justify-end mb-2">
-                                    <div className="bg-blue-600 rounded-lg p-2 max-w-3xl">
+                                <div key={index} className="flex justify-start mb-2">
+                                    <div className=" rounded-lg px-4">
                                         {message.content}
                                     </div>
                                 </div>
@@ -33,7 +33,7 @@ export default function ChatBox({ llmMessage, setLlmMessage, setFollowUpPromptSt
             </div>
 
 
-            <div className="absolute bottom-10 w-full p-4">
+            <div className="absolute bottom-14 w-full p-4">
                 <form className="grid w-full gap-2 max-w-3xl bg-transparent" onSubmit={(e) => e.preventDefault()}>
                     <Textarea
                         onChange={(e) => setMessage(e.target.value)}

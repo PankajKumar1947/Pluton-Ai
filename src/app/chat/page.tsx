@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/resizable";
 import Preview from "@/components/features/preview/preview";
 import { WebContainer } from "@webcontainer/api";
+import { Button } from "@/components/ui/button";
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
@@ -63,7 +64,7 @@ export default function Chat() {
     const [url, setUrl] = useState('');
 
     const storedPrompts = sessionStorage.getItem('prompts');
-    const prompts: string[] = storedPrompts ? JSON.parse(storedPrompts) : []; 
+    const prompts: string[] = storedPrompts ? JSON.parse(storedPrompts) : [];
     const [llmMessage, setLlmMessage] = useState<{ role: string; content: string }[]>(
         prompts.map((content) => ({
             role: "user",
@@ -141,18 +142,18 @@ export default function Chat() {
                 }
 
 
-                //@ts-ignore
-                setLlmMessage([...prompts, prompt].map(content => ({
-                    role: "user",
-                    content
-                })));
+                // //@ts-ignore
+                // setLlmMessage([...prompts, prompt].map(content => ({
+                //     role: "",
+                //     content
+                // })));
 
                 setLlmMessage((prev) => [
                     ...prev,
                     { role: "assistant", content: buffer }
                 ])
-                
-                if(!webcontainer){
+
+                if (!webcontainer) {
                     const webcontainerInstance = await WebContainer.boot();
                     setWebcontainer(webcontainerInstance)
                 }
@@ -179,43 +180,52 @@ export default function Chat() {
     // console.log("codeResponse", codeResponse);
     // console.log("files", files);
     return (
-        <ResizablePanelGroup
-            direction="horizontal"
-            className="rounded-lg w-[100vw] max-h-screen overflow-hidden"
-        >
-            {/* Chat Box */}
-            <ResizablePanel defaultSize={30}>
-                <ChatBox llmMessage={llmMessage} setLlmMessage={setLlmMessage} setFollowUpPromptStatus={setFollowUpPromptStatus}/>
-            </ResizablePanel>
-            <ResizableHandle />
-
-            <ResizablePanel defaultSize={70} className="h-screen space-y-1">
-                <div className="bg-white max-w-56 flex justify-between rounded-2xl outline-0">
-                    <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"} px-8 py-1 rounded-2xl cursor-pointer`}>
-                        Code
-                    </button>
-                    <button onClick={() => setPreview(true)} className={`px-8 py-1 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
-                        Preview
-                    </button>
+        <div className="w-[100vw] max-h-screen overflow-hidden">
+            <div className="px-4 py-3 flex justify-between">
+                <h1 className="text-2xl font-bold text-indigo-600">Pluton Ai</h1>
+                <h1 className="text-center">{artifact?.title || "Pluton AI"}</h1>
+                <div className="space-x-2 text-sm">
+                    <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Save</button>
+                    <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
                 </div>
+            </div>
+            <ResizablePanelGroup
+                direction="horizontal"
+                className="border"
+            >
+                {/* Chat Box */}
+                <ResizablePanel defaultSize={30}>
+                    <ChatBox llmMessage={llmMessage} setLlmMessage={setLlmMessage} setFollowUpPromptStatus={setFollowUpPromptStatus} />
+                </ResizablePanel>
+                <ResizableHandle />
 
-                {
-                    preview ? (
-                        <Preview files={files} webContainerInstance={webcontainer} url={url} setUrl={setUrl} />
-                    ) : <ResizablePanelGroup direction="vertical" className="h-full">
-                        {/* Code Editor */}
-                        <ResizablePanel defaultSize={100} className="border">
-                            <CodeEditor files={files} code={codeResponse} />
-                        </ResizablePanel>
-                        <ResizableHandle />
+                <ResizablePanel defaultSize={70} className="space-y-1 h-screen mt-2 px-2">
+                    <div className="bg-white max-w-56 flex justify-between rounded-2xl outline-0">
+                        <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"} px-8 py-1 rounded-2xl cursor-pointer`}>
+                            Code
+                        </button>
+                        <button onClick={() => setPreview(true)} className={`px-8 py-1 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
+                            Preview
+                        </button>
+                    </div>
 
-                        {/* Terminal */}
-                        <ResizablePanel defaultSize={20} className="rounded-t-2xl border">
+                    {
+                        preview ? (
+                            <Preview files={files} webContainerInstance={webcontainer} url={url} setUrl={setUrl} />
+                        ) : <ResizablePanelGroup direction="vertical" className="h-full">
+                            {/* Code Editor */}
+                            <ResizablePanel defaultSize={100} >
+                                <CodeEditor files={files} code={codeResponse} />
+                            </ResizablePanel>
+
+                            {/* Terminal */}
+                            {/* <ResizablePanel defaultSize={20} className="rounded-t-2xl border">
                             <Terminal />
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                }
-            </ResizablePanel>
-        </ResizablePanelGroup>
+                        </ResizablePanel> */}
+                        </ResizablePanelGroup>
+                    }
+                </ResizablePanel>
+            </ResizablePanelGroup>
+        </div>
     );
 }

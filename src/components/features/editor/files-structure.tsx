@@ -1,5 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { File, Folder } from "lucide-react";
+import { ArrowBigRight, ChevronDown, ChevronRight, File, Folder } from "lucide-react";
 import { useState } from "react";
 
 export default function FileStructure({ files, setActiveFile }: any) {
@@ -16,17 +16,17 @@ export default function FileStructure({ files, setActiveFile }: any) {
 }
 
 const List = ({ files, setActiveFile }: any) => {
-    const [folderOpen, setFolderOpen] = useState(false);
+    const [folderOpen, setFolderOpen] = useState(true);
     return (
-        <div className="text-sm space-y-1 pl-4">
+        <div className="text-sm space-y-1 pl-4 text-slate-300">
             {files?.map((file: any, ind: number) => (
                 <div key={ind} className="space-y-2">
-                    <div key={ind} className="text-sm">{
+                    <div key={ind} className="text-base">{
                         file?.type === "file" ? <div onClick={() => setActiveFile(file)} className="flex items-center cursor-pointer hover:opacity-80">
-                            <File className="h-4" />
+                            <File className="h-3" />
                             {file?.filePath}
                         </div> : <div onClick={() => setFolderOpen(!folderOpen)} className="flex items-center cursor-pointer hover:opacity-80">
-                            <Folder className="h-4" />
+                            {folderOpen ? <ChevronDown className="h-5 pt-0.5"/> :  <ChevronRight className="h-5 pt-0.5" />}
                             {file?.folderPath}
                         </div>
                     }</div>
