@@ -3,11 +3,12 @@ import { Mistral } from "@mistralai/mistralai";
 import { BASE_PROMPT } from "@/constants/prompts";
 import { reactBasePrompt } from "@/defaults/react";
 import { nodeBasePrompt } from "@/defaults/nodej";
+import prisma from "@/utils/prisma";
 
 const apiKey = process.env.MISTRAL_API_KEY;
 const client = new Mistral({ apiKey: apiKey });
 
-export async function POST(req: NextRequest, res: NextRequest) {
+export async function POST(req: NextRequest) {
     const prompt = await req.json();
 
     try {
@@ -35,13 +36,22 @@ export async function POST(req: NextRequest, res: NextRequest) {
         })
 
         //@ts-ignore
-        const answer = result.choices[0].message.content
+        const answer = result.choices[0].message.content;
+
+        const createProject = await prisma.project.create({
+            data: {
+                name: prompt?.prompt,
+                ownerId: "cm9195ao70000356owa054inb",// TODO: 🙃🙃
+                tech: answer as string
+            }
+        })
 
         if (answer === "react") {
             return NextResponse.json(
                 {
                     prompts: [BASE_PROMPT, `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${JSON.stringify(reactBasePrompt)}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
-                    uiPrompts: reactBasePrompt
+                    uiPrompts: reactBasePrompt,
+                    project: createProject
                 },
                 { status: 200 }
             )
@@ -54,7 +64,8 @@ export async function POST(req: NextRequest, res: NextRequest) {
             return NextResponse.json(
                 {
                     prompts: [`Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${JSON.stringify(nodeBasePrompt)}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
-                    uiPrompts: nodeBasePrompt
+                    uiPrompts: nodeBasePrompt,
+                    project: createProject
                 },
                 { status: 200 })
         }
