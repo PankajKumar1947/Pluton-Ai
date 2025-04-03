@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import ChatBox from "@/components/features/chat/chat-box";
 import CodeEditor from "@/components/features/editor/code-editor";
-import Terminal from "@/components/features/terminal/terminal";
 
 import {
     ResizableHandle,
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/resizable";
 import Preview from "@/components/features/preview/preview";
 import { WebContainer } from "@webcontainer/api";
-import { Button } from "@/components/ui/button";
 import axios from "axios";
 
 
@@ -53,9 +51,26 @@ const buildFileTree = (initialFiles: any, files: any) => {
     return tree;
 };
 
+const updateFile = (prevFile:any, newFiles:any) => {
+    for(let i=0;i<newFiles.length;i++){
+        let j=0;
+        for(j=0;j<prevFile.length;j++){
+            if(prevFile[j].filePath === newFiles[i].filePath){
+                prevFile[j].code = newFiles[i].code;
+                break;
+            }
+        }
+        if(j===prevFile.length){
+            prevFile.push(newFiles[i]);
+        }
+    }
+    return prevFile;
+};
+
 export default function Chat() {
     const searchParams = useSearchParams();
     const prompt = searchParams.get("prompt");
+    const projectId = searchParams.get("projectId");
     const [files, setFiles] = useState(JSON.parse(sessionStorage.getItem('files') || '[]'));
     const [codeResponse, setCodeResponse] = useState("");
     const [artifact, setArtifact] = useState({ id: "", title: "", actions: [] });
@@ -74,6 +89,8 @@ export default function Chat() {
     );
     const [followUpPromptStatus, setFollowUpPromptStatus] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [updateStatus, setUpdateStatus] = useState(false);
+    const [previousFile, setPreviousFile] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -143,13 +160,6 @@ export default function Chat() {
                     setCodeResponse((prevResponse) => prevResponse + chunk);
                 }
 
-
-                // //@ts-ignore
-                // setLlmMessage([...prompts, prompt].map(content => ({
-                //     role: "",
-                //     content
-                // })));
-
                 setLlmMessage((prev) => [
                     ...prev,
                     { role: "assistant", content: buffer }
@@ -163,6 +173,7 @@ export default function Chat() {
                 setDisablePreview(true);
                 setPreview(true);
                 setUrl("");
+                setUpdateStatus(true);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -171,14 +182,15 @@ export default function Chat() {
         fetchData();
     }, [followUpPromptStatus]);
 
-    const saveFilesToDB = async () => {
+    const saveFilesToDB = async (newFiles: any) => {
         try {
             setSaving(true);
             const response = await axios.post("/api/projects", {
-                userId: "cm8zhuaew0000356phofi235d",
-                files: files,
-                projectId: "cm8zntmmv0001n6z8sqfqgydo",
-                projectName: prompt
+                userId: "cm9195ao70000356owa054inb",
+                files: newFiles,
+                projectId: projectId,
+                name: prompt,
+                version: 1
             });
 
             if (response.status === 200) {
@@ -201,13 +213,26 @@ export default function Chat() {
     // console.log("artifact", artifact);
     // console.log("codeResponse", codeResponse);
     // console.log("files", files);
+
+    useEffect(() => {
+        
+        if (updateStatus) {
+            let newFiles = updateFile(previousFile, artifact.actions);
+            setPreviousFile(newFiles);
+            saveFilesToDB(newFiles);
+            console.log("updateStatus", updateStatus);
+            console.log("files", newFiles);
+            setUpdateStatus(false);
+        }
+
+    },[updateStatus]);
     return (
         <div className="w-[100vw] max-h-screen overflow-hidden">
             <div className="px-4 py-3 flex justify-between">
                 <h1 className="text-2xl font-bold text-indigo-600">Pluton Ai</h1>
                 <h1 className="text-center">{artifact?.title || "Pluton AI"}</h1>
                 <div className="space-x-2 text-sm">
-                    <button disabled={saving} onClick={saveFilesToDB} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">{saving ? "Saving..." : "Save"} </button>
+                    {/* <button disabled={saving} onClick={saveFilesToDB} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">{saving ? "Saving..." : "Save"} </button> */}
                     <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
                 </div>
             </div>
@@ -239,11 +264,6 @@ export default function Chat() {
                             <ResizablePanel defaultSize={100} >
                                 <CodeEditor files={files} code={codeResponse} />
                             </ResizablePanel>
-
-                            {/* Terminal */}
-                            {/* <ResizablePanel defaultSize={20} className="rounded-t-2xl border">
-                            <Terminal />
-                        </ResizablePanel> */}
                         </ResizablePanelGroup>
                     }
                 </ResizablePanel>

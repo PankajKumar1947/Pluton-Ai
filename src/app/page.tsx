@@ -20,9 +20,10 @@ export default function Home() {
       if (response.status === 200) {
         const prompts = response.data?.prompts;
         prompts.push(prompt);
+        const projectId = response.data?.project?.id;
         sessionStorage.setItem('prompts', JSON.stringify(prompts));
         sessionStorage.setItem('files', JSON.stringify(response.data?.uiPrompts?.boltArtifact?.boltAction));
-        router.push(`/chat?prompt=${prompt}`);
+        router.push(`/chat?prompt=${prompt}&projectId=${projectId}`);
       }
     } catch (error) {
       console.error("Error sending Prompt:", error);

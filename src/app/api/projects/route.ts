@@ -4,15 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     const data = await req.json();
     try {
-        const { userId, files, projectId, projectName } = data;
+        const { name, version, projectId, files } = data;
 
-        if (!userId || !files.length) {
+        if (!name || !version || !projectId || !files.length) {
             return NextResponse.json(
                 { message: "Missing required fields" },
                 { status: 400 }
             );
         }
 
+        // TODO
+        /*
         const userExist = prisma.user.findUnique({
             where: {
                 id: userId
@@ -25,6 +27,7 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
+        */
 
         const projectExist = await prisma.project.findUnique({
             where: {
@@ -33,36 +36,27 @@ export async function POST(req: NextRequest) {
         })
 
         if (!projectExist) {
-            // create project
-            const project = await prisma.project.create({
-                data: {
-                    ownerId: userId,
-                    name: projectName,
-                    files: files
-                }
-            })
-
             return NextResponse.json(
-                { message: "Project created successfully", project },
-                { status: 200 }
-            );
-        } else {
-            //update the project
-            await prisma.project.update({
-                where: {
-                    id: projectId,
-                },
-                data: {
-                    files: files,
-                    name: projectName,
-                }
-            })
-
-            return NextResponse.json(
-                { message: "Project updated successfully" },
-                { status: 200 }
+                { message: "Project does not exist" },
+                { status: 400 }
             );
         }
+
+        // creating the version of the project
+        const projectVersion = await prisma.version.create({
+            data: {
+                name,
+                version: version+1,
+                projectId,
+                files
+            }
+        })
+
+        return NextResponse.json(
+            { message: "Project created successfully", data: projectVersion },
+            { status: 200 },
+        );
+        
     } catch (error) {
         console.log(error);
         return NextResponse.json(
@@ -73,11 +67,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    const userId = req.nextUrl.searchParams.get("userId") as string;
     try {
         const projects = await prisma.project.findMany({
             where: {
-                ownerId: userId
+                ownerId: "cm9195ao70000356owa054inb" // TODO
             },
             select:  {
                 id: true,
