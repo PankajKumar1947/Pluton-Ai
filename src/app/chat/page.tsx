@@ -15,6 +15,7 @@ import { WebContainer } from "@webcontainer/api";
 import axios from "axios";
 import { reactBasePrompt } from "@/defaults/react";
 import { nodeBasePrompt } from "@/defaults/nodej";
+import CodeLoader from "@/components/code-loader";
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
@@ -53,16 +54,16 @@ const buildFileTree = (initialFiles: any, files: any) => {
     return tree;
 };
 
-const updateFile = (prevFile:any, newFiles:any) => {
-    for(let i=0;i<newFiles.length;i++){
-        let j=0;
-        for(j=0;j<prevFile.length;j++){
-            if(prevFile[j].filePath === newFiles[i].filePath){
+const updateFile = (prevFile: any, newFiles: any) => {
+    for (let i = 0; i < newFiles.length; i++) {
+        let j = 0;
+        for (j = 0; j < prevFile.length; j++) {
+            if (prevFile[j].filePath === newFiles[i].filePath) {
                 prevFile[j].code = newFiles[i].code;
                 break;
             }
         }
-        if(j===prevFile.length){
+        if (j === prevFile.length) {
             prevFile.push(newFiles[i]);
         }
     }
@@ -94,7 +95,7 @@ export default function Chat() {
     const [saving, setSaving] = useState(false);
     const [updateStatus, setUpdateStatus] = useState(false);
     const [previousFile, setPreviousFile] = useState([]);
-    const [fetchPreviousFile, setFetchPreviousFile]=useState(prompt ? false : true);
+    const [fetchPreviousFile, setFetchPreviousFile] = useState(prompt ? false : true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -187,7 +188,7 @@ export default function Chat() {
             try {
                 const response = await axios.get(`/api/projects/${projectId}`);
                 const versions = response.data?.data?.versions;
-                setFiles(buildFileTree(files,versions[versions?.length-1]?.files));
+                setFiles(buildFileTree(files, versions[versions?.length - 1]?.files));
                 if (!webcontainer) {
                     const webcontainerInstance = await WebContainer.boot();
                     setWebcontainer(webcontainerInstance)
@@ -195,19 +196,19 @@ export default function Chat() {
                 setPreview(true)
                 setFetchPreviousFile(false)
 
-            }catch(error){
-                console.log("error ",error);
+            } catch (error) {
+                console.log("error ", error);
                 return null;
             }
         }
 
-        if(fetchPreviousFile){
+        if (fetchPreviousFile) {
             getProjectById(projectId as string);
-        }else{
+        } else {
             fetchData();
         }
 
-        
+
     }, [followUpPromptStatus]);
 
     const saveFilesToDB = async (newFiles: any) => {
@@ -243,7 +244,7 @@ export default function Chat() {
     // console.log("files", files);
 
     useEffect(() => {
-        
+
         if (updateStatus) {
             let newFiles = updateFile(previousFile, artifact.actions);
             setPreviousFile(newFiles);
@@ -253,7 +254,7 @@ export default function Chat() {
             setUpdateStatus(false);
         }
 
-    },[updateStatus]);
+    }, [updateStatus]);
     return (
         <div className="w-[100vw] max-h-screen overflow-hidden">
             <div className="px-4 py-3 flex justify-between">
@@ -264,38 +265,42 @@ export default function Chat() {
                     <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
                 </div>
             </div>
-            <ResizablePanelGroup
-                direction="horizontal"
-                className="border"
-            >
-                {/* Chat Box */}
-                <ResizablePanel defaultSize={30}>
-                    <ChatBox llmMessage={llmMessage} setLlmMessage={setLlmMessage} setFollowUpPromptStatus={setFollowUpPromptStatus} />
-                </ResizablePanel>
-                <ResizableHandle />
+            {
+                fetchPreviousFile ? <CodeLoader /> : (
+                    <ResizablePanelGroup
+                        direction="horizontal"
+                        className="border"
+                    >
+                        {/* Chat Box */}
+                        <ResizablePanel defaultSize={30}>
+                            <ChatBox llmMessage={llmMessage} setLlmMessage={setLlmMessage} setFollowUpPromptStatus={setFollowUpPromptStatus} />
+                        </ResizablePanel>
+                        <ResizableHandle />
 
-                <ResizablePanel defaultSize={70} className="space-y-1 h-screen mt-2 px-2">
-                    <div className="bg-white max-w-36 flex justify-between rounded-2xl outline-0 text-sm">
-                        <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"}  py-1 px-4 rounded-2xl cursor-pointer`}>
-                            Code
-                        </button>
-                        <button onClick={() => setPreview(true)} className={` py-1 px-4 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
-                            Preview
-                        </button>
-                    </div>
+                        <ResizablePanel defaultSize={70} className="space-y-1 h-screen mt-2 px-2">
+                            <div className="bg-white max-w-36 flex justify-between rounded-2xl outline-0 text-sm">
+                                <button onClick={() => setPreview(false)} className={`${!preview ? "bg-blue-700" : "bg-white text-black"}  py-1 px-4 rounded-2xl cursor-pointer`}>
+                                    Code
+                                </button>
+                                <button onClick={() => setPreview(true)} className={` py-1 px-4 ${preview ? "bg-blue-700" : "bg-white text-black"} rounded-2xl cursor-pointer`}>
+                                    Preview
+                                </button>
+                            </div>
 
-                    {
-                        preview ? (
-                            <Preview files={files} webContainerInstance={webcontainer} url={url} setUrl={setUrl} />
-                        ) : <ResizablePanelGroup direction="vertical" className="h-full">
-                            {/* Code Editor */}
-                            <ResizablePanel defaultSize={100} >
-                                <CodeEditor files={files} code={codeResponse} />
-                            </ResizablePanel>
-                        </ResizablePanelGroup>
-                    }
-                </ResizablePanel>
-            </ResizablePanelGroup>
+                            {
+                                preview ? (
+                                    <Preview files={files} webContainerInstance={webcontainer} url={url} setUrl={setUrl} />
+                                ) : <ResizablePanelGroup direction="vertical" className="h-full">
+                                    {/* Code Editor */}
+                                    <ResizablePanel defaultSize={100} >
+                                        <CodeEditor files={files} code={codeResponse} />
+                                    </ResizablePanel>
+                                </ResizablePanelGroup>
+                            }
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                )
+            }
         </div>
     );
 }
