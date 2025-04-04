@@ -13,6 +13,8 @@ import {
 import Preview from "@/components/features/preview/preview";
 import { WebContainer } from "@webcontainer/api";
 import axios from "axios";
+import { reactBasePrompt } from "@/defaults/react";
+import { nodeBasePrompt } from "@/defaults/nodej";
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
@@ -71,7 +73,8 @@ export default function Chat() {
     const searchParams = useSearchParams();
     const prompt = searchParams.get("prompt");
     const projectId = searchParams.get("projectId");
-    const [files, setFiles] = useState(JSON.parse(sessionStorage.getItem('files') || '[]'));
+    const tech = sessionStorage.getItem("tech");
+    const [files, setFiles] = useState(tech === "react" ? reactBasePrompt?.boltArtifact?.boltAction : nodeBasePrompt);
     const [codeResponse, setCodeResponse] = useState("");
     const [artifact, setArtifact] = useState({ id: "", title: "", actions: [] });
     const [preview, setPreview] = useState(false);
@@ -91,6 +94,7 @@ export default function Chat() {
     const [saving, setSaving] = useState(false);
     const [updateStatus, setUpdateStatus] = useState(false);
     const [previousFile, setPreviousFile] = useState([]);
+    const [fetchPreviousFile, setFetchPreviousFile]=useState(prompt ? false : true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -119,7 +123,7 @@ export default function Chat() {
                     if (done) break;
 
                     const chunk = decoder.decode(value, { stream: true });
-                    buffer += chunk; // Accumulate stream
+                    buffer += chunk;
 
                     // console.log("chunk", chunk);
 
@@ -179,7 +183,31 @@ export default function Chat() {
             }
         };
 
-        fetchData();
+        const getProjectById = async (projectId: string) => {
+            try {
+                const response = await axios.get(`/api/projects/${projectId}`);
+                const versions = response.data?.data?.versions;
+                setFiles(buildFileTree(files,versions[versions?.length-1]?.files));
+                if (!webcontainer) {
+                    const webcontainerInstance = await WebContainer.boot();
+                    setWebcontainer(webcontainerInstance)
+                }
+                setPreview(true)
+                setFetchPreviousFile(false)
+
+            }catch(error){
+                console.log("error ",error);
+                return null;
+            }
+        }
+
+        if(fetchPreviousFile){
+            getProjectById(projectId as string);
+        }else{
+            fetchData();
+        }
+
+        
     }, [followUpPromptStatus]);
 
     const saveFilesToDB = async (newFiles: any) => {

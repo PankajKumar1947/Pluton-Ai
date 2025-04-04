@@ -13,38 +13,11 @@ import {
 } from "@/components/ui/sidebar"
 import { useEffect, useState } from "react"
 import axios from "axios"
-
-// Menu items.
-const items = [
-    {
-        title: "Home",
-        url: "#",
-        icon: Home,
-    },
-    {
-        title: "Inbox",
-        url: "#",
-        icon: Inbox,
-    },
-    {
-        title: "Calendar",
-        url: "#",
-        icon: Calendar,
-    },
-    {
-        title: "Search",
-        url: "#",
-        icon: Search,
-    },
-    {
-        title: "Settings",
-        url: "#",
-        icon: Settings,
-    },
-]
+import { useRouter } from "next/navigation"
 
 export function AppSidebar() {
     const [projects, setProjects] = useState([]);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -74,9 +47,13 @@ export function AppSidebar() {
                             {projects.map((item: any) => (
                                 <SidebarMenuItem key={item?.id}>
                                     <SidebarMenuButton asChild>
-                                        <a href={item.url}>
+                                        <button onClick={()=>{
+                                            console.log("item",item)
+                                            sessionStorage.setItem("tech",item?.tech)
+                                            router.push(`/chat?projectId=${item?.id}`);
+                                        }}>
                                             <span>{item.name}</span>
-                                        </a>
+                                        </button>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}

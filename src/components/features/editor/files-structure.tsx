@@ -17,6 +17,7 @@ export default function FileStructure({ files, setActiveFile }: any) {
 
 const List = ({ files, setActiveFile }: any) => {
     const [folderOpen, setFolderOpen] = useState(true);
+    console.log("files",files)
     return (
         <div className="text-sm space-y-1 pl-4 text-slate-300">
             {files?.map((file: any, ind: number) => (
