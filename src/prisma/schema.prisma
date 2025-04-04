@@ -18,23 +18,24 @@ model User {
 }
 
 model Project {
-  id       String    @id @default(cuid())
-  name     String
-  owner    User      @relation(fields: [ownerId], references: [id])
-  ownerId  String
-  tech     String
-  versions Version[]
+  id        String    @id @default(cuid())
+  name      String
+  owner     User      @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  tech      String
+  versions  Version[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
 model Version {
-  id        String  @id @default(cuid())
-  name      String
-  version   Int     @default(1)
-  project   Project @relation(fields: [projectId], references: [id])
-  projectId String
-  files     Json[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String   @id @default(cuid())
+  prompt      String
+  version     Int      @default(1)
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  llmMessages Json[]
+  files       Json[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

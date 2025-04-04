@@ -25,9 +25,10 @@ CREATE TABLE "Project" (
 -- CreateTable
 CREATE TABLE "Version" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "prompt" TEXT NOT NULL,
     "version" INTEGER NOT NULL DEFAULT 1,
     "projectId" TEXT NOT NULL,
+    "llmMessages" JSONB[],
     "files" JSONB[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

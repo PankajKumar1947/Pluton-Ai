@@ -189,6 +189,7 @@ export default function Chat() {
                 const response = await axios.get(`/api/projects/${projectId}`);
                 const versions = response.data?.data?.versions;
                 setFiles(buildFileTree(files, versions[versions?.length - 1]?.files));
+                setLlmMessage(versions[versions?.length - 1]?.llmMessages);
                 if (!webcontainer) {
                     const webcontainerInstance = await WebContainer.boot();
                     setWebcontainer(webcontainerInstance)
@@ -218,8 +219,9 @@ export default function Chat() {
                 userId: "cm9195ao70000356owa054inb",
                 files: newFiles,
                 projectId: projectId,
-                name: prompt,
-                version: 1
+                prompt: artifact?.title,
+                version: 1,
+                llmMessages: llmMessage
             });
 
             if (response.status === 200) {

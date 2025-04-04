@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     const data = await req.json();
     try {
-        const { name, version, projectId, files } = data;
+        const { prompt, version, projectId, files, llmMessages } = data;
 
-        if (!name || !version || !projectId || !files.length) {
+        if (!prompt || !version || !projectId || !files.length) {
             return NextResponse.json(
                 { message: "Missing required fields" },
                 { status: 400 }
@@ -45,10 +45,11 @@ export async function POST(req: NextRequest) {
         // creating the version of the project
         const projectVersion = await prisma.version.create({
             data: {
-                name,
+                prompt: prompt,
                 version: version+1,
                 projectId,
-                files
+                files,
+                llmMessages
             }
         })
 
