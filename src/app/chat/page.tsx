@@ -16,6 +16,8 @@ import axios from "axios";
 import { reactBasePrompt } from "@/defaults/react";
 import { nodeBasePrompt } from "@/defaults/nodej";
 import CodeLoader from "@/components/code-loader";
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 
 const buildFileTree = (initialFiles: any, files: any) => {
@@ -213,6 +215,31 @@ export default function Chat() {
 
     }, [followUpPromptStatus]);
 
+
+    const generateZip = async () => {
+        const zip = new JSZip();
+
+        const addToZip = (zipInstance: any, items: any, basePath = '') => {
+            items.forEach((item: any) => {
+                if (item.type === 'folder') {
+                    let folderPath = `${basePath}${item.folderPath}`;
+                    const folder = zipInstance.folder(folderPath);
+                    addToZip(folder, item.files || [], '');
+                } else if (item.type === 'file') {
+                    let fullPath = `${basePath}${item.filePath}`;
+                    zipInstance.file(fullPath, item.content || '');
+                }
+            });
+        };
+
+        addToZip(zip, files);
+
+        const blob = await zip.generateAsync({ type: 'blob' });
+
+        saveAs(blob, 'my-project.zip');
+    };
+
+
     const saveFilesToDB = async (newFiles: any) => {
         try {
             setSaving(true);
@@ -244,7 +271,7 @@ export default function Chat() {
 
     // console.log("artifact", artifact);
     // console.log("codeResponse", codeResponse);
-    // console.log("files", files);
+    console.log("files", files);
 
     useEffect(() => {
 
@@ -265,7 +292,7 @@ export default function Chat() {
                 <h1 className="text-center">{artifact?.title || "Pluton AI"}</h1>
                 <div className="space-x-2 text-sm">
                     {/* <button disabled={saving} onClick={saveFilesToDB} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">{saving ? "Saving..." : "Save"} </button> */}
-                    <button className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
+                    <button onClick={generateZip} className="bg-blue-700 px-4 py-1 rounded-2xl cursor-pointer">Download</button>
                 </div>
             </div>
             {
