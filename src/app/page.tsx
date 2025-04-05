@@ -23,7 +23,6 @@ export default function Home() {
         const projectId = response.data?.project?.id;
         sessionStorage.setItem('prompts', JSON.stringify(prompts));
         sessionStorage.setItem('tech',response.data?.project?.tech);
-        // sessionStorage.setItem('files', JSON.stringify(response.data?.uiPrompts?.boltArtifact?.boltAction));
         router.push(`/chat?prompt=${prompt}&projectId=${projectId}`);
       }
     } catch (error) {

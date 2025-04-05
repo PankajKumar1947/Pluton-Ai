@@ -16,16 +16,14 @@ export default function ChatBox({ llmMessage, setLlmMessage, setFollowUpPromptSt
         <div className="border h-full relative">
             <div className="p-4">
                 <h1 className="font-semibold text-center">Chat Messages</h1>
-                <div className="mt-4 h-[400px] overflow-y-scroll">
+                <div className="mt-4 min-h-[400px] overflow-y-auto">
                     {
                         llmMessage
                             .filter((message: any) => message.role.trim() === "user") // Ensure no extra spaces
                             .slice(2)
                             .map((message: any, index: number) => (
-                                <div key={index} className="flex justify-start mb-2">
-                                    <div className=" rounded-lg px-4">
-                                        {message.content}
-                                    </div>
+                                <div key={index} className="flex justify-start mb-2 bg-slate-800 px-4 py-2 rounded-lg">
+                                    {message.content}
                                 </div>
                             ))
                     }
