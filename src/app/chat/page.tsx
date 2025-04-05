@@ -101,6 +101,7 @@ export default function Chat() {
         const fetchData = async () => {
             try {
                 setPreview(false);
+                setCodeResponse("");
                 // Send the request to the /api/chats endpoint
                 const res = await fetch("/api/chats", {
                     method: "POST",
@@ -219,7 +220,7 @@ export default function Chat() {
                 userId: "cm9195ao70000356owa054inb",
                 files: newFiles,
                 projectId: projectId,
-                prompt: artifact?.title,
+                prompt: prompt,
                 version: 1,
                 llmMessages: llmMessage
             });

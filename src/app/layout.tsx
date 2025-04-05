@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar";
+import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,13 @@ export default function RootLayout({
           enableSystem={true}
           disableTransitionOnChange
         >
-          <SidebarProvider defaultOpen={false}>
-            <AppSidebar />
-            <SidebarTrigger/>
-            {children}
-          </SidebarProvider>
+          <SessionProvider>
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
+              <SidebarTrigger />
+              {children}
+            </SidebarProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,4 @@
 "use client"
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
 
 import {
     Sidebar,
@@ -14,10 +13,14 @@ import {
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useRouter } from "next/navigation"
+import { useSession ,signIn, signOut} from "next-auth/react"
+import { Button } from "./ui/button"
 
 export function AppSidebar() {
     const [projects, setProjects] = useState([]);
     const router = useRouter();
+    const { data: session } = useSession();
+    console.log("session", session);
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -47,9 +50,9 @@ export function AppSidebar() {
                             {projects.map((item: any) => (
                                 <SidebarMenuItem key={item?.id}>
                                     <SidebarMenuButton asChild>
-                                        <button onClick={()=>{
-                                            console.log("item",item)
-                                            sessionStorage.setItem("tech",item?.tech)
+                                        <button onClick={() => {
+                                            console.log("item", item)
+                                            sessionStorage.setItem("tech", item?.tech)
                                             router.push(`/chat?projectId=${item?.id}`);
                                         }}>
                                             <span>{item.name}</span>
@@ -62,7 +65,13 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarContent>
             <div className="flex pb-20 justify-center p-6">
-                <button className="bg-red-600 px-8 py-1 rounded-2xl cursor-pointer"> Logout</button>
+                {
+                    session?.user ? (
+                        <Button onClick={() => signOut()} className="bg-red-500 text-white">Sign out</Button>
+                    ) : (
+                        <Button onClick={() => signIn()}>Sign in</Button>
+                    )
+                }
             </div>
         </Sidebar>
     )
